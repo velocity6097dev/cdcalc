@@ -25,12 +25,14 @@
     --blue:#3DA5E8; --yellow:#FFE000; --line:#1C3C52;
     color-scheme: dark;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
     margin:0; background:var(--page-bg); color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
   }
+  button{touch-action:manipulation; user-select:none; font-family:inherit;}
   .app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);
     display:flex;flex-direction:column;
     padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
@@ -38,48 +40,71 @@
     body{display:flex;justify-content:center;padding:28px 12px;}
     .app{min-height:auto;border-radius:30px;overflow:hidden;box-shadow:0 24px 70px rgba(0,40,70,.28);}
   }
-  .appbar{background:var(--blue);color:#fff;padding:18px 18px 16px;}
+  .appbar{background:var(--blue);color:#fff;padding:18px 18px 16px;
+    box-shadow:0 4px 14px rgba(0,40,70,.18);position:relative;z-index:2;}
   .appbar-row{display:flex;justify-content:space-between;align-items:center;}
-  h1{margin:0;font-family:Georgia,"Iowan Old Style",serif;font-size:21px;font-weight:600;}
-  .text-btn{background:none;border:none;color:#D7ECFA;font-size:13px;text-decoration:underline;cursor:pointer;padding:4px;}
-  .date-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:#D7ECFA;}
-  input[type=date]{border:none;border-radius:7px;padding:6px 8px;font-size:13px;background:rgba(255,255,255,.18);color:#fff;font-family:inherit;}
+  h1{margin:0;font-family:Georgia,"Iowan Old Style",serif;font-size:21px;font-weight:600;letter-spacing:.2px;}
+  .clear-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);
+    border:none;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;
+    border-radius:999px;cursor:pointer;}
+  .clear-btn:active{background:rgba(255,255,255,.3);}
+  .date-row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:#D7ECFA;}
+  input[type=date]{border:none;border-radius:999px;padding:7px 13px;font-size:15px;
+    background:rgba(255,255,255,.18);color:#fff;font-family:inherit;font-weight:600;}
   input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
   main{flex:1;}
   .place-row{display:flex;align-items:center;justify-content:space-between;
-    padding:16px 18px;border-bottom:1px solid var(--line);background:none;border-left:none;border-right:none;border-top:none;
-    width:100%;text-align:left;cursor:pointer;color:var(--ink);}
+    min-height:62px;padding:12px 18px;border-bottom:1px solid var(--line);background:none;
+    border-left:none;border-right:none;border-top:none;width:100%;text-align:left;
+    cursor:pointer;color:var(--ink);}
+  .place-row:active{background:rgba(0,123,201,.07);}
+  .place-left{display:flex;align-items:center;gap:13px;}
+  .icon-badge{width:44px;height:44px;border-radius:50%;background:rgba(0,123,201,.12);
+    display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;}
+  .place-row .name{font-size:15.5px;font-weight:600;}
   .place-row .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
-  .place-row .amt{font-weight:700;color:var(--blue);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:16px;}
+  .place-row .amt{font-weight:700;color:var(--blue);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-variant-numeric:tabular-nums;font-size:17px;}
   .cta-bar{padding:14px 18px;background:var(--surface);border-top:1px solid var(--line);
-    padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
-  #review-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--yellow);
-    color:#05263B;font-weight:800;font-size:16px;cursor:pointer;}
-  #review-btn:active{opacity:.85;}
+    box-shadow:0 -4px 14px rgba(0,40,70,.08);padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+  #review-btn{width:100%;padding:16px;border:none;border-radius:13px;background:var(--yellow);
+    color:#05263B;font-weight:800;font-size:16px;cursor:pointer;min-height:52px;}
+  #review-btn:active{transform:scale(.98);}
 
-  .overlay{position:fixed;inset:0;background:rgba(5,30,50,.5);display:none;
+  .overlay{position:fixed;inset:0;background:rgba(5,30,50,.52);display:none;
     align-items:flex-end;justify-content:center;z-index:50;}
   .overlay.open{display:flex;}
-  .sheet{background:var(--surface);width:100%;max-width:430px;max-height:85vh;overflow-y:auto;
-    border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));}
-  .sheet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-  .sheet-header h2{margin:0;font-size:18px;}
-  .close-btn{background:none;border:none;font-size:24px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:0 2px;}
+  .sheet{background:var(--surface);width:100%;max-width:430px;max-height:88vh;overflow-y:auto;
+    border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -10px 30px rgba(0,0,0,.2);}
+  .sheet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .sheet-header h2{margin:0;font-size:18px;font-weight:700;}
+  .close-btn{background:var(--bg);border:none;font-size:20px;line-height:1;color:var(--ink-soft);
+    cursor:pointer;width:32px;height:32px;border-radius:50%;}
 
-  table{width:100%;border-collapse:collapse;}
-  td{padding:7px 0;font-size:15px;border-bottom:1px solid var(--line);}
-  .denom-cell{width:30%;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink-soft);}
-  .qty-cell{width:32%;text-align:center;}
-  .amt-cell{width:38%;text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
-  input[type=number]{width:70px;text-align:center;padding:6px 4px;border:1px solid var(--line);
-    border-radius:7px;background:var(--bg);color:var(--ink);font-size:15px;font-family:inherit;-moz-appearance:textfield;}
-  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-  .done-btn{width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;
-    background:var(--blue);color:#fff;font-weight:700;font-size:15px;cursor:pointer;}
+  .entry-subtotal-row{display:flex;justify-content:space-between;align-items:baseline;
+    background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-weight:700;}
+  #entry-subtotal{color:var(--blue);font-size:21px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+  .denom-row{background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;}
+  .denom-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .denom-label{font-weight:700;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;width:58px;flex-shrink:0;}
+  .qty-input{width:62px;text-align:center;font-size:16px;padding:8px 4px;border:1px solid var(--line);
+    border-radius:9px;background:var(--surface);color:var(--ink);font-family:inherit;-moz-appearance:textfield;}
+  .qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .row-amt{font-weight:700;color:var(--blue);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:15px;flex:1;text-align:right;font-variant-numeric:tabular-nums;}
+  .stepper-row{display:flex;gap:7px;}
+  .step-btn{flex:1;padding:10px 0;border:none;border-radius:9px;background:var(--blue);color:#fff;
+    font-weight:700;font-size:13.5px;cursor:pointer;min-height:42px;transition:transform .05s;}
+  .step-btn:active{transform:scale(.95);opacity:.85;}
+  .done-btn{width:100%;margin-top:8px;padding:14px;border:none;border-radius:11px;
+    background:var(--yellow);color:#05263B;font-weight:800;font-size:15px;cursor:pointer;min-height:48px;}
+  .done-btn:active{transform:scale(.98);}
 
   .summary-date{color:var(--ink-soft);font-size:13px;margin:0 0 14px;}
   .place-sum{list-style:none;margin:0 0 6px;padding:0;}
-  .place-sum li{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:15px;}
+  .place-sum li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px;}
   .grand-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;
     border-top:2px solid var(--ink);margin-bottom:16px;}
   .grand-row span:first-child{font-weight:700;font-size:16px;}
@@ -88,9 +113,9 @@
   h3.denom-h{font-size:13px;color:var(--ink-soft);margin:0 0 8px;font-weight:600;}
   .denom-list{list-style:none;margin:0 0 18px;padding:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;}
   .denom-list li{display:flex;justify-content:space-between;padding:4px 0;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
-  #send-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--yellow);
-    color:#05263B;font-weight:800;font-size:16px;cursor:pointer;}
-  #send-btn:active{opacity:.85;}
+  #send-btn{width:100%;padding:16px;border:none;border-radius:13px;background:var(--yellow);
+    color:#05263B;font-weight:800;font-size:16px;cursor:pointer;min-height:52px;}
+  #send-btn:active{transform:scale(.98);}
 </style>
 </head>
 <body>
@@ -98,7 +123,7 @@
   <header class="appbar">
     <div class="appbar-row">
       <h1>Cash Deposit</h1>
-      <button id="reset-btn" class="text-btn" type="button">Clear</button>
+      <button id="reset-btn" class="clear-btn" type="button">↺ Clear</button>
     </div>
     <div class="date-row">
       <label for="date-input">Date</label>
@@ -111,7 +136,7 @@
   </main>
 
   <div class="cta-bar">
-    <button id="review-btn" type="button">Review &amp; Send</button>
+    <button id="review-btn" type="button">🧾 Review &amp; Send</button>
   </div>
 </div>
 
@@ -121,8 +146,12 @@
       <h2 id="entry-title">Home</h2>
       <button class="close-btn" type="button" data-close="entry-overlay">&times;</button>
     </div>
-    <table><tbody id="entry-body"></tbody></table>
-    <button class="done-btn" type="button" data-close="entry-overlay">Done</button>
+    <div class="entry-subtotal-row">
+      <span>Subtotal</span>
+      <span id="entry-subtotal">₹0</span>
+    </div>
+    <div id="entry-body"></div>
+    <button class="done-btn" type="button" data-close="entry-overlay">✓ Done</button>
   </div>
 </div>
 
@@ -140,15 +169,20 @@
     </div>
     <h3 class="denom-h">Denomination breakdown (all places combined)</h3>
     <ul id="combined-list" class="denom-list"></ul>
-    <button id="send-btn" type="button">Send to Father on WhatsApp</button>
+    <button id="send-btn" type="button">📲 Send to Father on WhatsApp</button>
   </div>
 </div>
 
 <script>
-const DENOMS = [2000,500,200,100,50,20,10,5,2,1];
-const PLACES = [['home','Home'],['office','Office'],['morning','Morning Shift'],['evening','Evening Shift']];
+const DENOMS = [500,200,100,50,20,10];
+const PLACES = [
+  ['home','Home','🏠'],
+  ['office','Office','🏢'],
+  ['morning','Morning Shift','🌅'],
+  ['evening','Evening Shift','🌇']
+];
 const PHONE = '919088086294';
-const STORE_KEY = 'cashCalc:v1';
+const STORE_KEY = 'cashCalc:v3';
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function fmt(n){ return '₹' + n.toLocaleString('en-IN'); }
@@ -156,15 +190,26 @@ function formatDateReadable(dstr){
   const d = new Date(dstr + 'T00:00:00');
   return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
 }
+function emptyQty(){
+  const qty = {};
+  PLACES.forEach(([id]) => { qty[id] = {}; DENOMS.forEach(d => qty[id][d]=0); });
+  return qty;
+}
 
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
-    if(raw){ const s = JSON.parse(raw); if(s && s.qty) return s; }
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s && s.qty){
+        if(s.date !== todayStr()){
+          return { date: todayStr(), qty: emptyQty() };
+        }
+        return s;
+      }
+    }
   }catch(e){}
-  const qty = {};
-  PLACES.forEach(([id]) => { qty[id] = {}; DENOMS.forEach(d => qty[id][d]=0); });
-  return { date: todayStr(), qty };
+  return { date: todayStr(), qty: emptyQty() };
 }
 function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
 
@@ -176,11 +221,14 @@ function placeSubtotal(id){
 
 function renderPlaceList(){
   const root = document.getElementById('place-list');
-  root.innerHTML = PLACES.map(([id,label]) => `
+  root.innerHTML = PLACES.map(([id,label,icon]) => `
     <button type="button" class="place-row" data-place="${id}">
-      <span>
-        <div>${label}</div>
-        <div class="sub">Tap to enter notes</div>
+      <span class="place-left">
+        <span class="icon-badge">${icon}</span>
+        <span>
+          <div class="name">${label}</div>
+          <div class="sub">Tap to enter notes</div>
+        </span>
       </span>
       <span class="amt">${fmt(placeSubtotal(id))}</span>
     </button>`).join('');
@@ -189,27 +237,56 @@ function renderPlaceList(){
   });
 }
 
+function updateEntrySubtotal(placeId){
+  document.getElementById('entry-subtotal').textContent = fmt(placeSubtotal(placeId));
+}
+
 function openEntry(placeId){
-  const label = PLACES.find(p => p[0] === placeId)[1];
-  document.getElementById('entry-title').textContent = label;
+  const [, label, icon] = PLACES.find(p => p[0] === placeId);
+  document.getElementById('entry-title').textContent = `${icon} ${label}`;
   const body = document.getElementById('entry-body');
   body.innerHTML = DENOMS.map(d => `
-    <tr>
-      <td class="denom-cell">₹${d}</td>
-      <td class="qty-cell"><input type="number" inputmode="numeric" min="0" step="1"
-        data-denom="${d}" value="${state.qty[placeId][d] || ''}"></td>
-      <td class="amt-cell" id="e-amt-${d}">${fmt((state.qty[placeId][d]||0)*d)}</td>
-    </tr>`).join('');
-  body.querySelectorAll('input').forEach(inp => {
+    <div class="denom-row" data-denom="${d}">
+      <div class="denom-row-top">
+        <div class="denom-label">₹${d}</div>
+        <input type="number" inputmode="numeric" min="0" class="qty-input" id="q-${d}"
+          value="${state.qty[placeId][d] || ''}">
+        <div class="row-amt" id="a-${d}">${fmt((state.qty[placeId][d]||0)*d)}</div>
+      </div>
+      <div class="stepper-row">
+        <button type="button" class="step-btn" data-denom="${d}" data-step="1">+1</button>
+        <button type="button" class="step-btn" data-denom="${d}" data-step="10">+10</button>
+        <button type="button" class="step-btn" data-denom="${d}" data-step="100">+100</button>
+      </div>
+    </div>`).join('');
+
+  function refreshRow(d){
+    const q = state.qty[placeId][d] || 0;
+    document.getElementById(`a-${d}`).textContent = fmt(q * d);
+    updateEntrySubtotal(placeId);
+    saveState();
+    renderPlaceList();
+  }
+
+  body.querySelectorAll('.qty-input').forEach(inp => {
     inp.addEventListener('input', () => {
       let v = parseInt(inp.value, 10);
       if(isNaN(v) || v < 0) v = 0;
-      state.qty[placeId][inp.dataset.denom] = v;
-      document.getElementById(`e-amt-${inp.dataset.denom}`).textContent = fmt(v * inp.dataset.denom);
-      saveState();
-      renderPlaceList();
+      const d = inp.id.split('-')[1];
+      state.qty[placeId][d] = v;
+      refreshRow(d);
     });
   });
+  body.querySelectorAll('.step-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset.denom, step = parseInt(btn.dataset.step, 10);
+      state.qty[placeId][d] = (state.qty[placeId][d] || 0) + step;
+      document.getElementById(`q-${d}`).value = state.qty[placeId][d];
+      refreshRow(d);
+    });
+  });
+
+  updateEntrySubtotal(placeId);
   openOverlay('entry-overlay');
 }
 
@@ -226,11 +303,11 @@ document.querySelectorAll('.overlay').forEach(ov => {
 function renderSummary(){
   const combined = {}; DENOMS.forEach(d => combined[d] = 0);
   let grand = 0;
-  const placeHtml = PLACES.map(([id,label]) => {
+  const placeHtml = PLACES.map(([id,label,icon]) => {
     const subtotal = placeSubtotal(id);
     DENOMS.forEach(d => combined[d] += (state.qty[id][d]||0));
     grand += subtotal;
-    return `<li><span>${label}</span><span>${fmt(subtotal)}</span></li>`;
+    return `<li><span>${icon} ${label}</span><span>${fmt(subtotal)}</span></li>`;
   }).join('');
   document.getElementById('place-sum-list').innerHTML = placeHtml;
   document.getElementById('grand-total').textContent = fmt(grand);
@@ -264,7 +341,7 @@ document.getElementById('send-btn').addEventListener('click', () => {
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
-  PLACES.forEach(([id]) => DENOMS.forEach(d => state.qty[id][d] = 0));
+  state.qty = emptyQty();
   saveState();
   renderPlaceList();
 });
