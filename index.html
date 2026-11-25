@@ -3,356 +3,468 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cash Deposit Calculator</title>
+<meta name="theme-color" content="#0E68B0">
+<title>Cash Deposit</title>
 <style>
-  :root{
-    --page-bg:#DCE8F0;
-    --bg:#EAF4FB; --surface:#FFFFFF; --ink:#0B2436; --ink-soft:#4C6B80;
-    --blue:#007BC9; --yellow:#FFE000; --line:#CFE4F2;
-    color-scheme: light;
+/* ---------- Design tokens ---------- */
+:root{
+  --page:#DDE6EE; --bg:#F3F6FA; --surface:#FFFFFF; --ink:#0F1F2E; --muted:#5B6F82; --line:#E1E8EF;
+  --head-1:#0E68B0; --head-2:#0A4A82; --accent:#FFD60A; --accent-ink:#1B1500;
+  --plus-bg:#E5F0FA; --plus-ink:#0B5FA5; --danger:#C0392B; --danger-bg:#FBE9E7; --wa:#1BA455;
+  --shadow:0 1px 2px rgba(15,31,46,.06),0 4px 14px rgba(15,31,46,.06);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page:#050D14; --bg:#0A141D; --surface:#12212F; --ink:#EAF1F7; --muted:#93A9BC; --line:#21364A;
+    --head-1:#0F4F83; --head-2:#0A3558; --plus-bg:#14344F; --plus-ink:#7CC0F5;
+    --danger:#FF9087; --danger-bg:#3B2023; --shadow:0 1px 2px rgba(0,0,0,.4);
+    color-scheme:dark;
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --page-bg:#04131F;
-      --bg:#071722; --surface:#0E2538; --ink:#EAF4FB; --ink-soft:#9FC3DA;
-      --blue:#3DA5E8; --yellow:#FFE000; --line:#1C3C52;
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"]{
-    --page-bg:#04131F;
-    --bg:#071722; --surface:#0E2538; --ink:#EAF4FB; --ink-soft:#9FC3DA;
-    --blue:#3DA5E8; --yellow:#FFE000; --line:#1C3C52;
-    color-scheme: dark;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
-  body{
-    margin:0; background:var(--page-bg); color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  button{touch-action:manipulation; user-select:none; font-family:inherit;}
-  .app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);
-    display:flex;flex-direction:column;
-    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
-  @media (min-width:431px){
-    body{display:flex;justify-content:center;padding:28px 12px;}
-    .app{min-height:auto;border-radius:30px;overflow:hidden;box-shadow:0 24px 70px rgba(0,40,70,.28);}
-  }
-  .appbar{background:var(--blue);color:#fff;padding:18px 18px 16px;
-    box-shadow:0 4px 14px rgba(0,40,70,.18);position:relative;z-index:2;}
-  .appbar-row{display:flex;justify-content:space-between;align-items:center;}
-  h1{margin:0;font-family:Georgia,"Iowan Old Style",serif;font-size:21px;font-weight:600;letter-spacing:.2px;}
-  .clear-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);
-    border:none;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;
-    border-radius:999px;cursor:pointer;}
-  .clear-btn:active{background:rgba(255,255,255,.3);}
-  .date-row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:#D7ECFA;}
-  input[type=date]{border:none;border-radius:999px;padding:7px 13px;font-size:15px;
-    background:rgba(255,255,255,.18);color:#fff;font-family:inherit;font-weight:600;}
-  input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);}
-  main{flex:1;}
-  .place-row{display:flex;align-items:center;justify-content:space-between;
-    min-height:62px;padding:12px 18px;border-bottom:1px solid var(--line);background:none;
-    border-left:none;border-right:none;border-top:none;width:100%;text-align:left;
-    cursor:pointer;color:var(--ink);}
-  .place-row:active{background:rgba(0,123,201,.07);}
-  .place-left{display:flex;align-items:center;gap:13px;}
-  .icon-badge{width:44px;height:44px;border-radius:50%;background:rgba(0,123,201,.12);
-    display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;}
-  .place-row .name{font-size:15.5px;font-weight:600;}
-  .place-row .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
-  .place-row .amt{font-weight:700;color:var(--blue);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    font-variant-numeric:tabular-nums;font-size:17px;}
-  .cta-bar{padding:14px 18px;background:var(--surface);border-top:1px solid var(--line);
-    box-shadow:0 -4px 14px rgba(0,40,70,.08);padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
-  #review-btn{width:100%;padding:16px;border:none;border-radius:13px;background:var(--yellow);
-    color:#05263B;font-weight:800;font-size:16px;cursor:pointer;min-height:52px;}
-  #review-btn:active{transform:scale(.98);}
+}
+:root[data-theme="dark"]{
+  --page:#050D14; --bg:#0A141D; --surface:#12212F; --ink:#EAF1F7; --muted:#93A9BC; --line:#21364A;
+  --head-1:#0F4F83; --head-2:#0A3558; --plus-bg:#14344F; --plus-ink:#7CC0F5;
+  --danger:#FF9087; --danger-bg:#3B2023; --shadow:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
 
-  .overlay{position:fixed;inset:0;background:rgba(5,30,50,.52);display:none;
-    align-items:flex-end;justify-content:center;z-index:50;}
-  .overlay.open{display:flex;}
-  .sheet{background:var(--surface);width:100%;max-width:430px;max-height:88vh;overflow-y:auto;
-    border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
-    box-shadow:0 -10px 30px rgba(0,0,0,.2);}
-  .sheet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-  .sheet-header h2{margin:0;font-size:18px;font-weight:700;}
-  .close-btn{background:var(--bg);border:none;font-size:20px;line-height:1;color:var(--ink-soft);
-    cursor:pointer;width:32px;height:32px;border-radius:50%;}
+/* ---------- Base ---------- */
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--page);color:var(--ink);overflow:hidden;
+  font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--head-1);z-index:10}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
-  .entry-subtotal-row{display:flex;justify-content:space-between;align-items:baseline;
-    background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-weight:700;}
-  #entry-subtotal{color:var(--blue);font-size:21px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+/* ---------- Layout ---------- */
+.app{height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+@media (min-width:600px){
+  .app{height:calc(100% - 48px);margin:24px auto;border-radius:28px;box-shadow:0 24px 70px rgba(0,30,60,.3)}
+}
+.top{flex-shrink:0;color:#fff;padding:16px 18px 18px;border-radius:0 0 26px 26px;
+  background:linear-gradient(160deg,var(--head-1),var(--head-2));box-shadow:0 8px 24px rgba(8,50,90,.25)}
+.top-row{display:flex;justify-content:space-between;align-items:center}
+.eyebrow{margin:0;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+h1{margin:2px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.total-card{margin-top:14px;padding:13px 15px;border-radius:18px;display:flex;justify-content:space-between;align-items:flex-end;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+.total-card .lbl{display:block;font-size:12px;font-weight:600;opacity:.8}
+#hero-total{display:block;font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+#hero-meta{font-size:12.5px;font-weight:600;opacity:.85;padding-bottom:4px}
+.date-row{margin-top:12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600}
+.date-row label{opacity:.85}
+input[type=date]{appearance:none;-webkit-appearance:none;border:1px solid rgba(255,255,255,.2);border-radius:999px;
+  padding:7px 14px;font:inherit;font-weight:700;color:#fff;background:rgba(255,255,255,.14);color-scheme:dark;min-height:36px}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer}
 
-  .denom-row{background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;}
-  .denom-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
-  .denom-label{font-weight:700;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;width:58px;flex-shrink:0;}
-  .qty-input{width:62px;text-align:center;font-size:16px;padding:8px 4px;border:1px solid var(--line);
-    border-radius:9px;background:var(--surface);color:var(--ink);font-family:inherit;-moz-appearance:textfield;}
-  .qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-  .row-amt{font-weight:700;color:var(--blue);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    font-size:15px;flex:1;text-align:right;font-variant-numeric:tabular-nums;}
-  .stepper-row{display:flex;gap:7px;}
-  .step-btn{flex:1;padding:10px 0;border:none;border-radius:9px;background:var(--blue);color:#fff;
-    font-weight:700;font-size:13.5px;cursor:pointer;min-height:42px;transition:transform .05s;}
-  .step-btn:active{transform:scale(.95);opacity:.85;}
-  .done-btn{width:100%;margin-top:8px;padding:14px;border:none;border-radius:11px;
-    background:var(--yellow);color:#05263B;font-weight:800;font-size:15px;cursor:pointer;min-height:48px;}
-  .done-btn:active{transform:scale(.98);}
+main{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 16px 10px}
+.section-label{margin:0 4px 10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cta{flex-shrink:0;padding:12px 16px;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(15,31,46,.06)}
+.cta .btn{width:100%;min-height:54px;font-size:16px}
 
-  .summary-date{color:var(--ink-soft);font-size:13px;margin:0 0 14px;}
-  .place-sum{list-style:none;margin:0 0 6px;padding:0;}
-  .place-sum li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px;}
-  .grand-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;
-    border-top:2px solid var(--ink);margin-bottom:16px;}
-  .grand-row span:first-child{font-weight:700;font-size:16px;}
-  .grand-row span:last-child{font-weight:800;font-size:25px;color:var(--blue);
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
-  h3.denom-h{font-size:13px;color:var(--ink-soft);margin:0 0 8px;font-weight:600;}
-  .denom-list{list-style:none;margin:0 0 18px;padding:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;}
-  .denom-list li{display:flex;justify-content:space-between;padding:4px 0;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
-  #send-btn{width:100%;padding:16px;border:none;border-radius:13px;background:var(--yellow);
-    color:#05263B;font-weight:800;font-size:16px;cursor:pointer;min-height:52px;}
-  #send-btn:active{transform:scale(.98);}
+/* ---------- Buttons (class based, so they style everywhere) ---------- */
+.btn{appearance:none;-webkit-appearance:none;border:0;margin:0;font:inherit;font-weight:700;cursor:pointer;
+  min-height:50px;padding:0 18px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  touch-action:manipulation;user-select:none;transition:transform .08s,filter .15s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 2px 0 rgba(0,0,0,.1),0 8px 18px rgba(255,214,10,.25)}
+.btn-wa{background:var(--wa);color:#fff;box-shadow:0 8px 18px rgba(27,164,85,.25)}
+.btn-soft{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-ghost{min-height:36px;padding:0 14px;font-size:13px;color:#fff;background:rgba(255,255,255,.16);border-radius:999px}
+.icon-btn{appearance:none;-webkit-appearance:none;border:0;width:34px;height:34px;border-radius:50%;font-size:22px;line-height:1;
+  background:var(--bg);color:var(--muted);cursor:pointer;touch-action:manipulation}
+
+/* ---------- Place list ---------- */
+.place{appearance:none;-webkit-appearance:none;width:100%;margin:0 0 10px;padding:12px 14px;display:flex;align-items:center;gap:13px;
+  text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);cursor:pointer;touch-action:manipulation;transition:transform .08s}
+.place:active{transform:scale(.985)}
+.badge{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--plus-bg)}
+.place-text{flex:1;min-width:0;display:flex;flex-direction:column}
+.place-name{font-weight:700;font-size:15.5px}
+.place-sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.place-amt{font-weight:800;font-size:17px}
+.chev{color:var(--muted);font-size:22px;line-height:1}
+
+/* ---------- Sheets ---------- */
+.overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(4,20,34,.55);
+  opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.overlay.open{opacity:1;visibility:visible}
+.overlay.center{align-items:center;padding:24px}
+.sheet{width:100%;max-width:440px;max-height:92%;display:flex;flex-direction:column;background:var(--surface);
+  border-radius:26px 26px 0 0;transform:translateY(28px);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.overlay.open .sheet{transform:none}
+.overlay.center .sheet{border-radius:22px;max-height:none;padding:20px}
+.grab{width:38px;height:4px;border-radius:4px;background:var(--line);margin:9px auto 0;flex-shrink:0}
+.sheet-head{flex-shrink:0;padding:8px 16px 12px}
+.head-row{display:flex;justify-content:space-between;align-items:center}
+.sheet h2{margin:0;font-size:19px;font-weight:800}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 16px 14px}
+.sheet-foot{flex-shrink:0;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.sheet-foot .btn-primary,.sheet-foot .btn-wa{flex:1}
+.strip{margin-top:10px;padding:11px 14px;border-radius:14px;background:var(--bg);display:flex;justify-content:space-between;align-items:center}
+.strip-lbl{display:block;font-weight:700}
+.strip-sub{font-size:12px;color:var(--muted)}
+.strip strong{font-size:23px;color:var(--plus-ink);font-weight:800}
+
+/* ---------- Denomination cards ---------- */
+.denom{padding:12px;margin-bottom:10px;border-radius:16px;background:var(--bg);border:1px solid var(--line)}
+.denom-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.note{min-width:62px;padding:7px 0;text-align:center;border-radius:10px;font-weight:800;font-size:16px;color:var(--accent-ink);background:var(--accent)}
+.x{color:var(--muted);font-weight:700}
+.qty{appearance:none;-moz-appearance:textfield;width:84px;min-height:42px;padding:0 8px;text-align:center;font:inherit;font-size:18px;font-weight:700;
+  color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:11px}
+.qty::-webkit-outer-spin-button,.qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty:focus{border-color:var(--plus-ink);outline:none;box-shadow:0 0 0 3px var(--plus-bg)}
+.d-amt{margin-left:auto;font-weight:800;font-size:16px;color:var(--plus-ink)}
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.chip{appearance:none;-webkit-appearance:none;border:0;min-height:42px;padding:0;border-radius:11px;font:inherit;font-size:13.5px;font-weight:800;
+  cursor:pointer;touch-action:manipulation;user-select:none;transition:transform .06s,opacity .15s}
+.chip:active{transform:scale(.93)}
+.chip.minus{background:var(--danger-bg);color:var(--danger)}
+.chip.plus{background:var(--plus-bg);color:var(--plus-ink)}
+.chip:disabled{opacity:.35;pointer-events:none}
+
+/* ---------- Summary ---------- */
+.summary-date{margin:0;font-size:13px;color:var(--muted)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.list li.empty{color:var(--muted);justify-content:center;border:0}
+.grand{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 16px;padding:14px 0;border-top:2px solid var(--ink)}
+.grand span:first-child{font-weight:700}
+.grand span:last-child{font-size:28px;font-weight:800;color:var(--plus-ink)}
+.sub-h{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.breakdown li{font-size:14.5px;color:var(--muted)}
+.confirm p{margin:6px 0 18px;color:var(--muted)}
+.confirm .row{display:flex;gap:10px}
+.confirm .btn{flex:1}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;max-width:calc(100% - 32px);
+  display:flex;align-items:center;gap:14px;padding:11px 16px;border-radius:14px;font-weight:600;font-size:14px;
+  color:#fff;background:#14232F;box-shadow:0 10px 30px rgba(0,0,0,.3);
+  opacity:0;visibility:hidden;transform:translate(-50%,10px);transition:opacity .2s,transform .2s,visibility .2s}
+.toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.toast-undo{appearance:none;-webkit-appearance:none;border:0;background:none;padding:4px 2px;font:inherit;font-weight:800;color:var(--accent);cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="appbar">
-    <div class="appbar-row">
-      <h1>Cash Deposit</h1>
-      <button id="reset-btn" class="clear-btn" type="button">↺ Clear</button>
+  <header class="top">
+    <div class="top-row">
+      <div><p class="eyebrow">Daily collection</p><h1>Cash Deposit</h1></div>
+      <button id="reset-btn" class="btn btn-ghost" type="button">↺ Clear all</button>
     </div>
-    <div class="date-row">
-      <label for="date-input">Date</label>
-      <input type="date" id="date-input">
+    <div class="total-card">
+      <div><span class="lbl">Total collected</span><span id="hero-total" class="num">₹0</span></div>
+      <span id="hero-meta">0 notes</span>
     </div>
+    <div class="date-row"><label for="date-input">Deposit date</label><input type="date" id="date-input"></div>
   </header>
 
   <main>
+    <p class="section-label">Collection points</p>
     <div id="place-list"></div>
   </main>
 
-  <div class="cta-bar">
-    <button id="review-btn" type="button">🧾 Review &amp; Send</button>
+  <div class="cta">
+    <button id="review-btn" class="btn btn-primary" type="button">Review &amp; Send &nbsp;→</button>
   </div>
 </div>
 
+<!-- Entry sheet -->
 <div class="overlay" id="entry-overlay">
-  <div class="sheet">
-    <div class="sheet-header">
-      <h2 id="entry-title">Home</h2>
-      <button class="close-btn" type="button" data-close="entry-overlay">&times;</button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="entry-title">
+    <div class="grab"></div>
+    <div class="sheet-head">
+      <div class="head-row"><h2 id="entry-title"></h2><button class="icon-btn" type="button" data-close="entry-overlay" aria-label="Close">&times;</button></div>
+      <div class="strip"><div><span class="strip-lbl">Subtotal</span><span class="strip-sub" id="entry-count"></span></div><strong class="num" id="entry-subtotal">₹0</strong></div>
     </div>
-    <div class="entry-subtotal-row">
-      <span>Subtotal</span>
-      <span id="entry-subtotal">₹0</span>
+    <div class="sheet-body" id="entry-body"></div>
+    <div class="sheet-foot">
+      <button class="btn btn-soft" id="entry-reset" type="button">Reset</button>
+      <button class="btn btn-primary" type="button" data-close="entry-overlay">✓ Done</button>
     </div>
-    <div id="entry-body"></div>
-    <button class="done-btn" type="button" data-close="entry-overlay">✓ Done</button>
   </div>
 </div>
 
+<!-- Summary sheet -->
 <div class="overlay" id="summary-overlay">
-  <div class="sheet">
-    <div class="sheet-header">
-      <h2>Summary</h2>
-      <button class="close-btn" type="button" data-close="summary-overlay">&times;</button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="summary-title">
+    <div class="grab"></div>
+    <div class="sheet-head">
+      <div class="head-row"><h2 id="summary-title">Summary</h2><button class="icon-btn" type="button" data-close="summary-overlay" aria-label="Close">&times;</button></div>
+      <p class="summary-date" id="summary-date"></p>
     </div>
-    <p class="summary-date" id="summary-date"></p>
-    <ul class="place-sum" id="place-sum-list"></ul>
-    <div class="grand-row">
-      <span>Total</span>
-      <span id="grand-total">₹0</span>
+    <div class="sheet-body">
+      <ul class="list" id="place-sum"></ul>
+      <div class="grand"><span>Total</span><span class="num" id="grand-total">₹0</span></div>
+      <h3 class="sub-h">Denomination breakdown</h3>
+      <ul class="list breakdown" id="combined-list"></ul>
     </div>
-    <h3 class="denom-h">Denomination breakdown (all places combined)</h3>
-    <ul id="combined-list" class="denom-list"></ul>
-    <button id="send-btn" type="button">📲 Send to Father on WhatsApp</button>
+    <div class="sheet-foot">
+      <button class="btn btn-soft" id="copy-btn" type="button">Copy</button>
+      <button class="btn btn-wa" id="send-btn" type="button">Send to Father on WhatsApp</button>
+    </div>
   </div>
 </div>
+
+<!-- Confirm clear -->
+<div class="overlay center" id="confirm-overlay">
+  <div class="sheet confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+    <h2 id="confirm-title">Clear all entries?</h2>
+    <p>Every place will be reset to zero. You can undo right after.</p>
+    <div class="row">
+      <button class="btn btn-soft" type="button" data-close="confirm-overlay">Cancel</button>
+      <button class="btn btn-danger" id="confirm-clear" type="button">Clear all</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-const DENOMS = [500,200,100,50,20,10];
+(() => {
+'use strict';
+
+/* ---------- Config ---------- */
+const DENOMS = [500, 200, 100, 50, 20, 10];
+const CHIPS  = [-100, -10, -1, 1, 10, 100];
 const PLACES = [
-  ['home','Home','🏠'],
-  ['office','Office','🏢'],
-  ['morning','Morning Shift','🌅'],
-  ['evening','Evening Shift','🌇']
+  { id: 'home',    label: 'Home',          icon: '🏠' },
+  { id: 'office',  label: 'Office',        icon: '🏢' },
+  { id: 'morning', label: 'Morning Shift', icon: '🌅' },
+  { id: 'evening', label: 'Evening Shift', icon: '🌇' }
 ];
-const PHONE = '919088086294';
-const STORE_KEY = 'cashCalc:v3';
+const CFG = { phone: '919088086294', key: 'cashCalc:v4', max: 99999 };
 
-function todayStr(){ return new Date().toISOString().slice(0,10); }
-function fmt(n){ return '₹' + n.toLocaleString('en-IN'); }
-function formatDateReadable(dstr){
-  const d = new Date(dstr + 'T00:00:00');
-  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const fmt = n => '₹' + n.toLocaleString('en-IN');
+const readable = s => new Date(s + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+const plural = n => `${n} ${n === 1 ? 'note' : 'notes'}`;
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+const emptyQty = () => Object.fromEntries(PLACES.map(p => [p.id, Object.fromEntries(DENOMS.map(d => [d, 0]))]));
+
+/* ---------- State (local date, so IST mornings never show yesterday) ---------- */
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(CFG.key) || 'null');
+    if (s && s.qty && s.savedOn === today()) return s;
+  } catch (e) {}
+  return { date: today(), savedOn: today(), qty: emptyQty() };
 }
-function emptyQty(){
-  const qty = {};
-  PLACES.forEach(([id]) => { qty[id] = {}; DENOMS.forEach(d => qty[id][d]=0); });
-  return qty;
-}
+let state = load();
+const save = () => { state.savedOn = today(); try { localStorage.setItem(CFG.key, JSON.stringify(state)); } catch (e) {} };
 
-function loadState(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    if(raw){
-      const s = JSON.parse(raw);
-      if(s && s.qty){
-        if(s.date !== todayStr()){
-          return { date: todayStr(), qty: emptyQty() };
-        }
-        return s;
-      }
-    }
-  }catch(e){}
-  return { date: todayStr(), qty: emptyQty() };
-}
-function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
-
-let state = loadState();
-
-function placeSubtotal(id){
-  return DENOMS.reduce((s,d) => s + (state.qty[id][d]||0) * d, 0);
+const qtyOf = (id, d) => (state.qty[id] && state.qty[id][d]) || 0;
+const subtotal = id => DENOMS.reduce((s, d) => s + qtyOf(id, d) * d, 0);
+const noteCount = id => DENOMS.reduce((s, d) => s + qtyOf(id, d), 0);
+function totals() {
+  const combined = {};
+  DENOMS.forEach(d => combined[d] = PLACES.reduce((s, p) => s + qtyOf(p.id, d), 0));
+  return {
+    combined,
+    grand: PLACES.reduce((s, p) => s + subtotal(p.id), 0),
+    notes: DENOMS.reduce((s, d) => s + combined[d], 0)
+  };
 }
 
-function renderPlaceList(){
-  const root = document.getElementById('place-list');
-  root.innerHTML = PLACES.map(([id,label,icon]) => `
-    <button type="button" class="place-row" data-place="${id}">
-      <span class="place-left">
-        <span class="icon-badge">${icon}</span>
-        <span>
-          <div class="name">${label}</div>
-          <div class="sub">Tap to enter notes</div>
-        </span>
-      </span>
-      <span class="amt">${fmt(placeSubtotal(id))}</span>
-    </button>`).join('');
-  root.querySelectorAll('.place-row').forEach(btn => {
-    btn.addEventListener('click', () => openEntry(btn.dataset.place));
-  });
-}
-
-function updateEntrySubtotal(placeId){
-  document.getElementById('entry-subtotal').textContent = fmt(placeSubtotal(placeId));
-}
-
-function openEntry(placeId){
-  const [, label, icon] = PLACES.find(p => p[0] === placeId);
-  document.getElementById('entry-title').textContent = `${icon} ${label}`;
-  const body = document.getElementById('entry-body');
-  body.innerHTML = DENOMS.map(d => `
-    <div class="denom-row" data-denom="${d}">
-      <div class="denom-row-top">
-        <div class="denom-label">₹${d}</div>
-        <input type="number" inputmode="numeric" min="0" class="qty-input" id="q-${d}"
-          value="${state.qty[placeId][d] || ''}">
-        <div class="row-amt" id="a-${d}">${fmt((state.qty[placeId][d]||0)*d)}</div>
-      </div>
-      <div class="stepper-row">
-        <button type="button" class="step-btn" data-denom="${d}" data-step="1">+1</button>
-        <button type="button" class="step-btn" data-denom="${d}" data-step="10">+10</button>
-        <button type="button" class="step-btn" data-denom="${d}" data-step="100">+100</button>
-      </div>
-    </div>`).join('');
-
-  function refreshRow(d){
-    const q = state.qty[placeId][d] || 0;
-    document.getElementById(`a-${d}`).textContent = fmt(q * d);
-    updateEntrySubtotal(placeId);
-    saveState();
-    renderPlaceList();
+/* ---------- Toast with optional undo ---------- */
+let toastTimer;
+function hideToast() { $('#toast').classList.remove('show'); }
+function toast(msg, undo) {
+  const t = $('#toast');
+  t.textContent = '';
+  const s = document.createElement('span'); s.textContent = msg; t.append(s);
+  if (undo) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'toast-undo'; b.textContent = 'Undo';
+    b.onclick = () => { undo(); hideToast(); };
+    t.append(b);
   }
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, undo ? 7000 : 2200);
+}
+const snap = () => JSON.stringify(state.qty);
+function restore(s) {
+  state.qty = JSON.parse(s); save(); renderHome();
+  if (current && $('#entry-overlay').classList.contains('open')) openEntry(current);
+}
 
-  body.querySelectorAll('.qty-input').forEach(inp => {
-    inp.addEventListener('input', () => {
-      let v = parseInt(inp.value, 10);
-      if(isNaN(v) || v < 0) v = 0;
-      const d = inp.id.split('-')[1];
-      state.qty[placeId][d] = v;
-      refreshRow(d);
-    });
-  });
-  body.querySelectorAll('.step-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const d = btn.dataset.denom, step = parseInt(btn.dataset.step, 10);
-      state.qty[placeId][d] = (state.qty[placeId][d] || 0) + step;
-      document.getElementById(`q-${d}`).value = state.qty[placeId][d];
-      refreshRow(d);
-    });
-  });
+/* ---------- Home ---------- */
+function renderHome() {
+  const t = totals();
+  $('#place-list').innerHTML = PLACES.map(p => {
+    const n = noteCount(p.id);
+    return `<button type="button" class="place" data-id="${p.id}">
+      <span class="badge">${p.icon}</span>
+      <span class="place-text"><span class="place-name">${p.label}</span><span class="place-sub">${n ? plural(n) : 'Tap to add notes'}</span></span>
+      <span class="place-amt num">${fmt(subtotal(p.id))}</span><span class="chev" aria-hidden="true">›</span>
+    </button>`;
+  }).join('');
+  $('#hero-total').textContent = fmt(t.grand);
+  $('#hero-meta').textContent = plural(t.notes);
+}
 
-  updateEntrySubtotal(placeId);
+/* ---------- Entry sheet ---------- */
+let current = null;
+
+function openEntry(id) {
+  current = id;
+  const p = PLACES.find(x => x.id === id);
+  $('#entry-title').textContent = `${p.icon} ${p.label}`;
+  $('#entry-body').innerHTML = DENOMS.map(d => `
+    <div class="denom" data-d="${d}">
+      <div class="denom-top">
+        <span class="note num">₹${d}</span><span class="x" aria-hidden="true">×</span>
+        <input class="qty num" type="number" inputmode="numeric" min="0" max="${CFG.max}" placeholder="0"
+          aria-label="Number of ₹${d} notes" value="${qtyOf(id, d) || ''}">
+        <span class="d-amt num"></span>
+      </div>
+      <div class="chips">${CHIPS.map(s =>
+        `<button type="button" class="chip ${s < 0 ? 'minus' : 'plus'}" data-s="${s}" aria-label="${s < 0 ? 'Remove' : 'Add'} ${Math.abs(s)} of ₹${d}">${s < 0 ? '−' : '+'}${Math.abs(s)}</button>`
+      ).join('')}</div>
+    </div>`).join('');
+  DENOMS.forEach(d => syncRow(d, false));
+  syncSubtotal();
   openOverlay('entry-overlay');
 }
 
-function openOverlay(id){ document.getElementById(id).classList.add('open'); }
-function closeOverlay(id){ document.getElementById(id).classList.remove('open'); }
-
-document.querySelectorAll('[data-close]').forEach(btn => {
-  btn.addEventListener('click', () => closeOverlay(btn.dataset.close));
-});
-document.querySelectorAll('.overlay').forEach(ov => {
-  ov.addEventListener('click', (e) => { if(e.target === ov) closeOverlay(ov.id); });
-});
-
-function renderSummary(){
-  const combined = {}; DENOMS.forEach(d => combined[d] = 0);
-  let grand = 0;
-  const placeHtml = PLACES.map(([id,label,icon]) => {
-    const subtotal = placeSubtotal(id);
-    DENOMS.forEach(d => combined[d] += (state.qty[id][d]||0));
-    grand += subtotal;
-    return `<li><span>${icon} ${label}</span><span>${fmt(subtotal)}</span></li>`;
-  }).join('');
-  document.getElementById('place-sum-list').innerHTML = placeHtml;
-  document.getElementById('grand-total').textContent = fmt(grand);
-  document.getElementById('summary-date').textContent = formatDateReadable(state.date);
-  const denomHtml = DENOMS.filter(d => combined[d] > 0)
-    .map(d => `<li><span>₹${d} × ${combined[d]}</span><span>${fmt(d*combined[d])}</span></li>`).join('');
-  document.getElementById('combined-list').innerHTML = denomHtml || '<li><span>No cash entered yet</span><span></span></li>';
-  return { combined, grand };
+function syncRow(d, writeInput) {
+  const row = $(`#entry-body .denom[data-d="${d}"]`);
+  if (!row) return;
+  const q = qtyOf(current, d);
+  row.querySelector('.d-amt').textContent = fmt(q * d);
+  row.querySelectorAll('.chip.minus').forEach(b => b.disabled = q === 0);
+  if (writeInput) row.querySelector('.qty').value = q || '';
+}
+function syncSubtotal() {
+  $('#entry-subtotal').textContent = fmt(subtotal(current));
+  $('#entry-count').textContent = plural(noteCount(current));
+}
+function setQty(d, v, writeInput) {
+  v = Math.min(CFG.max, Math.max(0, Number.isFinite(v) ? v : 0));
+  state.qty[current][d] = v;
+  syncRow(d, writeInput); syncSubtotal(); save(); renderHome();
 }
 
-document.getElementById('review-btn').addEventListener('click', () => {
-  renderSummary();
-  openOverlay('summary-overlay');
+const body = $('#entry-body');
+body.addEventListener('click', e => {
+  const c = e.target.closest('.chip');
+  if (!c || c.disabled) return;
+  const d = +c.closest('.denom').dataset.d;
+  setQty(d, qtyOf(current, d) + (+c.dataset.s), true);
+  buzz();
+});
+body.addEventListener('input', e => {
+  if (!e.target.matches('.qty')) return;
+  const d = +e.target.closest('.denom').dataset.d;
+  const v = parseInt(e.target.value, 10) || 0;
+  setQty(d, v, v < 0 || v > CFG.max);
+});
+body.addEventListener('focusin', e => { if (e.target.matches('.qty')) e.target.select(); });
+
+$('#entry-reset').addEventListener('click', () => {
+  if (!noteCount(current)) { toast('Nothing to reset'); return; }
+  const s = snap();
+  DENOMS.forEach(d => state.qty[current][d] = 0);
+  save(); renderHome(); openEntry(current);
+  toast('Place reset', () => restore(s));
 });
 
-function buildMessage(){
-  const { combined, grand } = renderSummary();
-  const lines = [];
-  lines.push(`*Cash Deposit – ${formatDateReadable(state.date)}*`, '');
-  PLACES.forEach(([id,label]) => lines.push(`${label}: ${fmt(placeSubtotal(id))}`));
-  lines.push('', `*Total: ${fmt(grand)}*`);
-  const denomLines = DENOMS.filter(d => combined[d] > 0)
-    .map(d => `₹${d} × ${combined[d]} = ${fmt(d*combined[d])}`);
-  if(denomLines.length) lines.push('', '_Denomination breakdown:_', ...denomLines);
-  return lines.join('\n');
+/* ---------- Overlays ---------- */
+const openOverlay = id => $('#' + id).classList.add('open');
+const closeOverlay = id => $('#' + id).classList.remove('open');
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-close]');
+  if (c) closeOverlay(c.dataset.close);
+  else if (e.target.classList.contains('overlay')) closeOverlay(e.target.id);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const o = [...document.querySelectorAll('.overlay.open')].pop();
+  if (o) closeOverlay(o.id);
+});
+
+/* ---------- Summary + sharing ---------- */
+function renderSummary() {
+  const t = totals();
+  $('#summary-date').textContent = readable(state.date);
+  $('#place-sum').innerHTML = PLACES.map(p =>
+    `<li><span>${p.icon} ${p.label}</span><span class="num">${fmt(subtotal(p.id))}</span></li>`).join('');
+  $('#grand-total').textContent = fmt(t.grand);
+  $('#combined-list').innerHTML = DENOMS.filter(d => t.combined[d]).map(d =>
+    `<li><span class="num">₹${d} × ${t.combined[d]}</span><span class="num">${fmt(d * t.combined[d])}</span></li>`).join('')
+    || '<li class="empty">No cash entered yet</li>';
+  $('#send-btn').disabled = $('#copy-btn').disabled = !t.grand;
 }
 
-document.getElementById('send-btn').addEventListener('click', () => {
-  const msg = buildMessage();
-  window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+function buildMessage() {
+  const t = totals();
+  const L = [`*Cash Deposit – ${readable(state.date)}*`, ''];
+  PLACES.forEach(p => L.push(`${p.label}: ${fmt(subtotal(p.id))}`));
+  L.push('', `*Total: ${fmt(t.grand)}*`);
+  const rows = DENOMS.filter(d => t.combined[d]).map(d => `₹${d} × ${t.combined[d]} = ${fmt(d * t.combined[d])}`);
+  if (rows.length) L.push('', '_Denomination breakdown:_', ...rows);
+  return L.join('\n');
+}
+
+$('#place-list').addEventListener('click', e => {
+  const b = e.target.closest('.place');
+  if (b) openEntry(b.dataset.id);
+});
+$('#review-btn').addEventListener('click', () => { renderSummary(); openOverlay('summary-overlay'); });
+
+$('#send-btn').addEventListener('click', () => {
+  const url = `https://wa.me/${CFG.phone}?text=${encodeURIComponent(buildMessage())}`;
+  if (!window.open(url, '_blank')) location.href = url;
+});
+$('#copy-btn').addEventListener('click', async () => {
+  const m = buildMessage();
+  try { await navigator.clipboard.writeText(m); }
+  catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = m; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (_) {}
+    ta.remove();
+  }
+  toast('Summary copied');
 });
 
-document.getElementById('reset-btn').addEventListener('click', () => {
-  state.qty = emptyQty();
-  saveState();
-  renderPlaceList();
+/* ---------- Clear all (confirm + undo) ---------- */
+$('#reset-btn').addEventListener('click', () => {
+  if (!totals().notes) { toast('Nothing to clear'); return; }
+  openOverlay('confirm-overlay');
+});
+$('#confirm-clear').addEventListener('click', () => {
+  const s = snap();
+  state.qty = emptyQty(); save(); renderHome();
+  closeOverlay('confirm-overlay');
+  toast('All entries cleared', () => restore(s));
 });
 
-document.getElementById('date-input').addEventListener('change', (e) => {
-  state.date = e.target.value || todayStr();
-  saveState();
-});
+/* ---------- Date ---------- */
+$('#date-input').addEventListener('change', e => { state.date = e.target.value || today(); e.target.value = state.date; save(); });
 
-document.getElementById('date-input').value = state.date || todayStr();
-renderPlaceList();
+/* ---------- Init ---------- */
+$('#date-input').value = state.date;
+renderHome();
+})();
 </script>
 </body>
 </html>
